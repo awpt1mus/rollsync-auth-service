@@ -133,3 +133,27 @@ For debugging during development you can use `VSCode debugger`.
 5. Once done push your changes and open a PR to merge into `main`. 
 
 6. Once PR is approved by atleast 1 person, it can be merged. 
+
+## Code quality 
+
+This Project is using Biome as Linter,formatter & Code analysis tool. 
+Before you push your changes make sure you run , 
+
+```shell
+> pnpm run check
+```
+
+This runs a linter, formatter & code analysis tool. Please fix all linter errors , once you see message 
+like below, you can push. 
+
+![biome check](/docs/biome_check.PNG)
+
+if you want to do linting and formatting separately then you can run below and fix separately.
+
+```shell
+> pnpm run format
+```
+
+```shell
+> pnpm run lint
+```
