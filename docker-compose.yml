@@ -29,6 +29,21 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     networks:
       - rollsync-auth-netword
+  
+  api:
+    container_name: rollsync-auth-service-img
+    image: rollsync-auth-service
+    build: 
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+    ports:
+      - "5000:5000"
+      - "9229:9229"
+    networks:
+    - rollsync-auth-netword
 
 volumes:
   db_data:
