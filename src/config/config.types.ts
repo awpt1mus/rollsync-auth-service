@@ -10,14 +10,16 @@ export const EnvironmentVariablesSchema = z.object({
   db_host: z.string().min(1),
 });
 
+export interface DatabaseConfig {
+  port: number;
+  name: string;
+  host: string;
+  user: string;
+  password: string;
+}
+
 export interface AppConfig {
   port: number;
   jwtSecret: string;
-  database: {
-    port: number;
-    name: string;
-    host: string;
-    user: string;
-    password: string;
-  };
+  database: DatabaseConfig
 }
