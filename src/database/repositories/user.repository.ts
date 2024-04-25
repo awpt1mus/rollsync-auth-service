@@ -1,13 +1,16 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { DB_CONNECTION } from "../connection.provider";
-import type { Kysely, Selectable } from "kysely";
+import type { Kysely, Selectable, UpdateResult } from "kysely";
 import type { DB, User } from "../generated.types";
+import { SignUpRequestDTO } from "src/auth/auth.dtos";
 
 export type UserEntity = Selectable<User>;
 
 export interface IUserRepository {
   findByEmail: (email: string) => Promise<UserEntity>;
   findById: (id: string) => Promise<UserEntity>;
+  insertUser: (dto: SignUpRequestDTO) => Promise<Pick<UserEntity, "id">>;
+  updateAttempts: (userId: string, attempts: number) => Promise<UpdateResult>;
 }
 
 @Injectable()
@@ -31,6 +34,22 @@ export class UserRepository implements IUserRepository {
       .selectFrom("user")
       .where("id", "=", id)
       .selectAll()
+      .executeTakeFirst();
+  }
+
+  async insertUser(dto: SignUpRequestDTO) {
+    return this.db
+      .insertInto("user")
+      .values(dto)
+      .returning("id")
+      .executeTakeFirst();
+  }
+
+  async updateAttempts(userId: string, attempts: number) {
+    return this.db
+      .updateTable("user")
+      .set("attempts", attempts)
+      .where("id", "=", userId)
       .executeTakeFirst();
   }
 }
