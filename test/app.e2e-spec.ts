@@ -1,6 +1,5 @@
 import type { INestApplication } from "@nestjs/common";
 import { Test, type TestingModule } from "@nestjs/testing";
-import * as request from "supertest";
 import { RootModule } from "./../src/root/root.module";
 
 describe("AppController (e2e)", () => {
