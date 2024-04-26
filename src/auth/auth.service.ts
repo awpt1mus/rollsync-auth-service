@@ -3,12 +3,11 @@ import {
 	Injectable,
 	UnauthorizedException,
 } from "@nestjs/common";
+import { plainToInstance } from "class-transformer";
 import { UserRepository } from "src/database/repositories/user.repository";
-import {
-	LoginRequestDTO,
-	LoginSuccessDto,
-	SignUpRequestDTO,
-} from "./auth.dtos";
+import { LoginDto } from "./dtos/login.dto";
+import { LoginSuccessDto } from "./dtos/login.success.dto";
+import { RegisterDto } from "./dtos/register.dto";
 import { TokenService } from "./jwt.service";
 import { PasswordService } from "./password.service";
 
@@ -20,7 +19,7 @@ export class AuthService {
 		private readonly tokenService: TokenService,
 	) {}
 
-	async registerUser(dto: SignUpRequestDTO) {
+	async registerUser(dto: RegisterDto) {
 		const existingUser = await this.userRepository.findByEmail(
 			dto.email.toLocaleLowerCase(),
 		);
@@ -37,7 +36,7 @@ export class AuthService {
 		return result.id;
 	}
 
-	async verifyLogin(dto: LoginRequestDTO): Promise<LoginSuccessDto> {
+	async verifyLogin(dto: LoginDto): Promise<LoginSuccessDto> {
 		const { email, password } = dto;
 
 		const existingUser = await this.userRepository.findByEmail(
@@ -74,7 +73,7 @@ export class AuthService {
 			email: email.toLocaleLowerCase(),
 		});
 
-		return {
+		return plainToInstance(LoginSuccessDto, {
 			access_token: accessToken,
 			id,
 			firstname,
@@ -82,6 +81,6 @@ export class AuthService {
 			username,
 			avatar_url,
 			email: email.toLocaleLowerCase(),
-		};
+		});
 	}
 }
