@@ -1,9 +1,8 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { AuthModule } from "src/auth/auth.module";
 import loadConfig from "../config/config.loader";
-import { connectionProvider } from "../database/connection.provider";
 import { RootController } from "./root.controller";
-
 @Module({
 	imports: [
 		ConfigModule.forRoot({
@@ -12,8 +11,8 @@ import { RootController } from "./root.controller";
 			isGlobal: true,
 			load: [loadConfig],
 		}),
+		AuthModule,
 	],
-	providers: [connectionProvider],
 	controllers: [RootController],
 })
 export class RootModule {}
