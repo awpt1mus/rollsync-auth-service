@@ -118,6 +118,10 @@ For debugging during development you can use `VSCode debugger`.
 5. If everything goes well, you shoud see debugger controlls and you can debug. 
 
 
+## Open API 
+
+Once container is running you can visit [http://localhost:5000/docs](http://localhost:5000/docs) to see swagger docs.
+
 ## Contribution guidelines
 
 1. `main` is the production branch, all issue/feature branches will be created from `main` branch.
