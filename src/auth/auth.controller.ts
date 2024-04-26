@@ -27,6 +27,11 @@ export class AuthController {
 		type: UnAuthorizedResponseDto,
 	})
 	@ApiResponse({
+		status: 400,
+		description: "invalid email or password etc",
+		type: BadRequestResponseDto,
+	})
+	@ApiResponse({
 		status: 200,
 		description: "login success",
 		type: LoginSuccessDto,
