@@ -1,8 +1,8 @@
-import { Inject, Injectable } from "@nestjs/common";
-import type { Kysely, Selectable, UpdateResult } from "kysely";
+import { Injectable } from "@nestjs/common";
+import { Selectable, UpdateResult } from "kysely";
 import { RegisterDto } from "src/auth/dtos/register.dto";
-import { DB_CONNECTION } from "../connection.provider";
-import type { DB, User } from "../generated.types";
+import { DatabaseConnectionService } from "../connection.service";
+import type { User } from "../generated.types";
 
 export type UserEntity = Selectable<User>;
 
@@ -15,14 +15,10 @@ export interface IUserRepository {
 
 @Injectable()
 export class UserRepository implements IUserRepository {
-	private readonly db: Kysely<DB>;
-
-	constructor(@Inject(DB_CONNECTION) db: Kysely<DB>) {
-		this.db = db;
-	}
+	constructor(private readonly databaseService: DatabaseConnectionService) {}
 
 	async findByEmail(email: string) {
-		return this.db
+		return this.databaseService.db
 			.selectFrom("user")
 			.where("email", "=", email)
 			.selectAll()
@@ -30,7 +26,7 @@ export class UserRepository implements IUserRepository {
 	}
 
 	async findById(id: string) {
-		return this.db
+		return this.databaseService.db
 			.selectFrom("user")
 			.where("id", "=", id)
 			.selectAll()
@@ -38,7 +34,7 @@ export class UserRepository implements IUserRepository {
 	}
 
 	async insertUser(dto: RegisterDto) {
-		return this.db
+		return this.databaseService.db
 			.insertInto("user")
 			.values(dto)
 			.returning("id")
@@ -46,7 +42,7 @@ export class UserRepository implements IUserRepository {
 	}
 
 	async updateAttempts(userId: string, attempts: number) {
-		return this.db
+		return this.databaseService.db
 			.updateTable("user")
 			.set("attempts", attempts)
 			.where("id", "=", userId)

@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
-import { connectionProvider } from "./connection.provider";
+import { DatabaseConnectionService } from "./connection.service";
 import { UserRepository } from "./repositories/user.repository";
 
 @Module({
-	providers: [connectionProvider, UserRepository],
-	exports: [connectionProvider, UserRepository],
+	providers: [DatabaseConnectionService, UserRepository],
+	exports: [DatabaseConnectionService, UserRepository],
 })
 export class DatabaseModule {}

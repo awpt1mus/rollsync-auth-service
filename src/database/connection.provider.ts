@@ -7,6 +7,9 @@ import type { DB } from "./generated.types";
 
 export const DB_CONNECTION = "CONNECTION";
 
+/**
+ * @deprecated Use DatabaseConnectionService instead
+ */
 export const connectionProvider: FactoryProvider = {
 	provide: DB_CONNECTION,
 	useFactory: (configService: ConfigService<AppConfig>) => {
