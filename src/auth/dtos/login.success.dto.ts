@@ -7,6 +7,12 @@ export class LoginSuccessDto {
 	})
 	access_token: string;
 
+	@ApiProperty({
+		description:
+			"refresh token, should be included in Authorization header when aquiring new access token",
+	})
+	refresh_token: string;
+
 	@ApiProperty({ description: "user id", default: "<UUID>" })
 	id: string;
 
