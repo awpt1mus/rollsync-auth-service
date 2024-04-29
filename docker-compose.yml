@@ -33,6 +33,8 @@ services:
   api:
     container_name: rollsync-auth-service-img
     image: rollsync-auth-service
+    depends_on:
+      - db
     build: 
       dockerfile: Dockerfile.dev
     env_file:
