@@ -8,15 +8,17 @@ import { TokenPayload, TokenValidationResult } from "../dtos/token.dtos";
 export class TokenService {
 	constructor(private readonly configService: ConfigService<AppConfig>) {}
 
-	newToken(payload: TokenPayload): Promise<string> {
+	private async generateNewToken(
+		payload: TokenPayload,
+		secret: string,
+		expiry: string,
+	): Promise<string> {
 		return new Promise((resolve, reject) => {
-			const secret = this.configService.get<string>("jwtSecret");
-
 			jwt.sign(
 				payload,
 				secret,
 				{
-					expiresIn: "1h",
+					expiresIn: expiry,
 					issuer: "rollsync-auth",
 				},
 				(err, encoded) => {
@@ -31,10 +33,11 @@ export class TokenService {
 		});
 	}
 
-	validateToken(token: string): Promise<TokenValidationResult> {
+	private async verifyToken(
+		token: string,
+		secret: string,
+	): Promise<TokenValidationResult> {
 		return new Promise((resolve, reject) => {
-			const secret = this.configService.get<string>("jwtSecret");
-
 			jwt.verify(token, secret, { issuer: "rollsync-auth" }, (err, decoded) => {
 				if (err) {
 					resolve({ success: false, payload: null });
@@ -55,5 +58,35 @@ export class TokenService {
 				return;
 			});
 		});
+	}
+
+	newAccessToken(payload: TokenPayload): Promise<string> {
+		return this.generateNewToken(
+			payload,
+			this.configService.get<string>("accessTokenSecret"),
+			"15m",
+		);
+	}
+
+	validateAccessToken(token: string): Promise<TokenValidationResult> {
+		return this.verifyToken(
+			token,
+			this.configService.get<string>("accessTokenSecret"),
+		);
+	}
+
+	newRefreshToken(payload: TokenPayload): Promise<string> {
+		return this.generateNewToken(
+			payload,
+			this.configService.get<string>("refreshTokenSecret"),
+			"30d",
+		);
+	}
+
+	validateRefreshToken(token: string) {
+		return this.verifyToken(
+			token,
+			this.configService.get<string>("refreshTokenSecret"),
+		);
 	}
 }
