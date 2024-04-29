@@ -54,6 +54,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
 		const ctx = host.switchToHttp();
 
+		console.log(exception);
+
 		const isApplicationException = exception instanceof ApplicationException;
 		const isHttpException = exception instanceof HttpException;
 

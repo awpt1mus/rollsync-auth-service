@@ -7,7 +7,7 @@ import {
 	UseFilters,
 	UseGuards,
 } from "@nestjs/common";
-import { ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UserEntity } from "src/database/dtos/custom.types";
 import {
 	ApplicationErrorCodes,
@@ -91,6 +91,7 @@ export class AuthController {
 	}
 
 	@Get("/me")
+	@ApiBearerAuth("jwt-auth")
 	@UseGuards(AuthGuard)
 	@ApiResponse({
 		status: 401,
@@ -144,6 +145,7 @@ export class AuthController {
 		description: "something went wrong on server",
 		type: ApplicationErrorResponse,
 	})
+	@HttpCode(200)
 	async getNewAccessToken(@Body() body: RefreshTokenRequestDto) {
 		return this.authService.getNewAccessToken(body.refresh_token);
 	}

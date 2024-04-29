@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
-import dayjs from "dayjs";
+import * as dayjs from "dayjs";
 import { RefreshTokenRepository } from "src/database/repositories/refresh.token.repository";
 import { UserRepository } from "src/database/repositories/user.repository";
 import {
@@ -132,6 +132,7 @@ export class AuthService {
 				email: email.toLocaleLowerCase(),
 			};
 		} catch (error) {
+			console.error(error);
 			throw new ApplicationException(
 				ApplicationErrorCodes.INTERNAL_SERVER_ERROR,
 				500,
@@ -162,9 +163,12 @@ export class AuthService {
 			);
 		}
 
-		const newAccessToken = await this.tokenService.newAccessToken(
-			tokenValidation.payload,
-		);
+		const { id, email } = tokenValidation.payload;
+
+		const newAccessToken = await this.tokenService.newAccessToken({
+			id,
+			email,
+		});
 
 		return { access_token: newAccessToken };
 	}
