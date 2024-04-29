@@ -4,6 +4,7 @@ import {
 	ExceptionFilter,
 	HttpException,
 	HttpStatus,
+	Logger,
 } from "@nestjs/common";
 import { HttpAdapterHost } from "@nestjs/core";
 import {
@@ -14,6 +15,8 @@ import { ApplicationErrorResponse } from "./dtos/error.response.dto";
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+	private readonly logger = new Logger(GlobalExceptionFilter.name);
+
 	constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
 	private handleApplicationException(
@@ -54,7 +57,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
 		const ctx = host.switchToHttp();
 
-		console.log(exception);
+		this.logger.error(exception);
 
 		const isApplicationException = exception instanceof ApplicationException;
 		const isHttpException = exception instanceof HttpException;

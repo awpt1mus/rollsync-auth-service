@@ -6,7 +6,12 @@ import type { AppConfig } from "./config/config.types";
 import { RootModule } from "./root/root.module";
 
 async function bootstrap() {
-	const app = await NestFactory.create(RootModule);
+	const app = await NestFactory.create(RootModule, {
+		logger:
+			process.env.NODE_ENV === "production"
+				? ["error", "log", "fatal"]
+				: ["log", "warn", "debug", "verbose", "error"],
+	});
 	const configService = app.get(ConfigService<AppConfig>);
 
 	app.useGlobalPipes(new ValidationPipe({ transform: true }));

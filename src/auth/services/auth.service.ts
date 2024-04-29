@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable, Logger } from "@nestjs/common";
 import * as dayjs from "dayjs";
 import { RefreshTokenRepository } from "src/database/repositories/refresh.token.repository";
 import { UserRepository } from "src/database/repositories/user.repository";
@@ -18,6 +18,8 @@ import { PasswordService } from "./password.service";
 
 @Injectable()
 export class AuthService {
+	private readonly logger = new Logger(AuthService.name);
+
 	constructor(
 		private readonly userRepository: UserRepository,
 		private readonly passwordService: PasswordService,
@@ -45,6 +47,8 @@ export class AuthService {
 			return result.id;
 		} catch (error: unknown) {
 			const isObject = typeof error === "object";
+
+			this.logger.error(error);
 
 			if (isObject && "code" in error) {
 				switch (error.code) {
@@ -132,7 +136,7 @@ export class AuthService {
 				email: email.toLocaleLowerCase(),
 			};
 		} catch (error) {
-			console.error(error);
+			this.logger.error(error);
 			throw new ApplicationException(
 				ApplicationErrorCodes.INTERNAL_SERVER_ERROR,
 				500,
