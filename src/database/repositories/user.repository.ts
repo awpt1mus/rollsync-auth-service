@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Selectable, UpdateResult } from "kysely";
 import { RegisterDto } from "src/auth/dtos/register.dto";
-import { DatabaseConnectionService } from "../connection.service";
 import type { User } from "../generated.types";
+import { DatabaseConnectionService } from "../services/connection.service";
 
 export type UserEntity = Selectable<User>;
 

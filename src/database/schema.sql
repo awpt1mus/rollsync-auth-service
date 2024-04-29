@@ -31,3 +31,10 @@ ALTER TABLE public.user
 CREATE UNIQUE INDEX unique_non_null_nullable_username_index 
     ON public.user (username)
     WHERE username IS NOT NULL;
+
+create table if not exists public.refresh_token(
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    value text not null unique,
+    expiry timestamptz not null,
+);
+

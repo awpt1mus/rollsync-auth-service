@@ -6,10 +6,10 @@ import {
 } from "src/root/dtos/application.exception";
 import { ApplicationErrorResponse } from "src/root/dtos/error.response.dto";
 import { GlobalExceptionFilter } from "src/root/global.exception.filter";
-import { AuthService } from "./auth.service";
 import { LoginDto } from "./dtos/login.dto";
 import { LoginSuccessDto } from "./dtos/login.success.dto";
 import { RegisterDto } from "./dtos/register.dto";
+import { AuthService } from "./services/auth.service";
 @Controller("auth")
 @ApiTags("auth")
 @UseFilters(GlobalExceptionFilter)

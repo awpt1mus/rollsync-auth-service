@@ -5,9 +5,9 @@ import {
 	ApplicationErrorCodes,
 	ApplicationException,
 } from "src/root/dtos/application.exception";
-import { LoginDto } from "./dtos/login.dto";
-import { LoginSuccessDto } from "./dtos/login.success.dto";
-import { RegisterDto } from "./dtos/register.dto";
+import { LoginDto } from "../dtos/login.dto";
+import { LoginSuccessDto } from "../dtos/login.success.dto";
+import { RegisterDto } from "../dtos/register.dto";
 import { TokenService } from "./jwt.service";
 import { PasswordService } from "./password.service";
 

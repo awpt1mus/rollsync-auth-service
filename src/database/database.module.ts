@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { DatabaseConnectionService } from "./connection.service";
 import { UserRepository } from "./repositories/user.repository";
+import { DatabaseConnectionService } from "./services/connection.service";
 
 @Module({
 	providers: [DatabaseConnectionService, UserRepository],

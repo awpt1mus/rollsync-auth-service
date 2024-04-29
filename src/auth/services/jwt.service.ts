@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as jwt from "jsonwebtoken";
 import { AppConfig } from "src/config/config.types";
-import { TokenPayload, TokenValidationResult } from "./dtos/token.dtos";
+import { TokenPayload, TokenValidationResult } from "../dtos/token.dtos";
 
 @Injectable()
 export class TokenService {
