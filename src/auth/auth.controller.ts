@@ -1,22 +1,18 @@
-import {
-	Body,
-	Controller,
-	HttpCode,
-	InternalServerErrorException,
-	Post,
-} from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, UseFilters } from "@nestjs/common";
 import { ApiResponse, ApiTags } from "@nestjs/swagger";
 import {
-	BadRequestResponseDto,
-	ConflictErrorResponse,
-	UnAuthorizedResponseDto,
-} from "src/root/dtos/error.response.dto";
+	ApplicationErrorCodes,
+	ApplicationException,
+} from "src/root/dtos/application.exception";
+import { ApplicationErrorResponse } from "src/root/dtos/error.response.dto";
+import { GlobalExceptionFilter } from "src/root/global.exception.filter";
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dtos/login.dto";
 import { LoginSuccessDto } from "./dtos/login.success.dto";
 import { RegisterDto } from "./dtos/register.dto";
 @Controller("auth")
 @ApiTags("auth")
+@UseFilters(GlobalExceptionFilter)
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 
@@ -24,12 +20,12 @@ export class AuthController {
 	@ApiResponse({
 		status: 401,
 		description: "authentication failed",
-		type: UnAuthorizedResponseDto,
+		type: ApplicationErrorResponse,
 	})
 	@ApiResponse({
 		status: 400,
 		description: "invalid email or password etc",
-		type: BadRequestResponseDto,
+		type: ApplicationErrorResponse,
 	})
 	@ApiResponse({
 		status: 200,
@@ -46,7 +42,7 @@ export class AuthController {
 	@ApiResponse({
 		status: 400,
 		description: "invalid request body provided",
-		type: BadRequestResponseDto,
+		type: ApplicationErrorResponse,
 	})
 	@ApiResponse({
 		status: 201,
@@ -55,15 +51,16 @@ export class AuthController {
 	@ApiResponse({
 		status: 409,
 		description: "Conflict",
-		type: ConflictErrorResponse,
+		type: ApplicationErrorResponse,
 	})
 	async handleTraditionalSignUp(@Body() body: RegisterDto) {
 		const result = await this.authService.registerUser(body);
 
 		if (!result) {
-			throw new InternalServerErrorException("unable to register user");
+			throw new ApplicationException(
+				ApplicationErrorCodes.AUTH_SIGNUP_FAILED,
+				500,
+			);
 		}
-
-		return;
 	}
 }
