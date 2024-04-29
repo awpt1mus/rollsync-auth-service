@@ -1,10 +1,8 @@
 import { Injectable } from "@nestjs/common";
-import { Selectable, UpdateResult } from "kysely";
+import { UpdateResult } from "kysely";
 import { RegisterDto } from "src/auth/dtos/register.dto";
-import type { User } from "../generated.types";
+import type { UserEntity } from "../dtos/custom.types";
 import { DatabaseConnectionService } from "../services/connection.service";
-
-export type UserEntity = Selectable<User>;
 
 export interface IUserRepository {
 	findByEmail: (email: string) => Promise<UserEntity>;

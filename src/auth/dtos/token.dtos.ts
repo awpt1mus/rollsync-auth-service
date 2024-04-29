@@ -1,4 +1,4 @@
-import { UserEntity } from "src/database/repositories/user.repository";
+import { UserEntity } from "src/database/dtos/custom.types";
 
 export type TokenPayload = Pick<UserEntity, "id" | "email">;
 

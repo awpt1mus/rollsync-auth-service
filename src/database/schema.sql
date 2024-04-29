@@ -34,7 +34,7 @@ CREATE UNIQUE INDEX unique_non_null_nullable_username_index
 
 create table if not exists public.refresh_token(
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    value text not null unique,
-    expiry timestamptz not null,
+    value text not null,
+    expiry timestamptz not null
 );
 

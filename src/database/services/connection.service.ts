@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
 import { AppConfig, DatabaseConfig } from "src/config/config.types";
-import { DB } from "../generated.types";
+import { DB } from "../dtos/generated.types";
 
 @Injectable()
 export class DatabaseConnectionService
