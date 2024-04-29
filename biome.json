@@ -15,6 +15,9 @@
 			},
 			"correctness": {
 				"noUnusedImports": "error"
+			},
+			"complexity": {
+				"useLiteralKeys": "off"
 			}
 		}
 	},
