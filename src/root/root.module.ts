@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AuthModule } from "src/auth/auth.module";
+import { LoggingMiddleware } from "src/logging/logging.middleware";
 import loadConfig from "../config/config.loader";
 import { RootController } from "./root.controller";
 @Module({
@@ -15,4 +16,8 @@ import { RootController } from "./root.controller";
 	],
 	controllers: [RootController],
 })
-export class RootModule {}
+export class RootModule implements NestModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer.apply(LoggingMiddleware).forRoutes("*");
+	}
+}
