@@ -3,10 +3,13 @@ import { ConfigService } from "@nestjs/config";
 import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
 import type { AppConfig, DatabaseConfig } from "src/config/config.types";
-import type { DB } from "./generated.types";
+import type { DB } from "../dtos/generated.types";
 
 export const DB_CONNECTION = "CONNECTION";
 
+/**
+ * @deprecated Use DatabaseConnectionService instead
+ */
 export const connectionProvider: FactoryProvider = {
 	provide: DB_CONNECTION,
 	useFactory: (configService: ConfigService<AppConfig>) => {

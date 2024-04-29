@@ -15,6 +15,18 @@ async function bootstrap() {
 		.setTitle("rollsync-auth-service")
 		.setDescription("authentication service for rollsync app")
 		.setVersion("1.0")
+		.addBearerAuth(
+			{
+				description:
+					"Include token in 'Authorization header' for protected endpoints",
+				type: "http",
+				scheme: "bearer",
+				bearerFormat: "JWT",
+				name: "JWT",
+				in: "header",
+			},
+			"jwt-auth",
+		)
 		.build();
 
 	const document = SwaggerModule.createDocument(app, swaggerConfig);

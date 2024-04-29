@@ -3,7 +3,8 @@ import { type AppConfig, EnvironmentVariablesSchema } from "./config.types";
 export default function loadConfig(): AppConfig {
 	const config: Record<string, string | number | undefined> = {
 		port: process.env.PORT,
-		secret: process.env.SECRET,
+		access_token_secret: process.env.ACCESS_TOKEN_SECRET,
+		refresh_token_secret: process.env.REFRESH_TOKEN_SECRET,
 		db_user: process.env.DB_USER,
 		db_pass: process.env.DB_PASS,
 		db_name: process.env.DB_NAME,
@@ -23,12 +24,21 @@ export default function loadConfig(): AppConfig {
 		);
 	}
 
-	const { port, secret, db_host, db_name, db_pass, db_port, db_user } =
-		configValidationResult.data;
+	const {
+		port,
+		access_token_secret,
+		refresh_token_secret,
+		db_host,
+		db_name,
+		db_pass,
+		db_port,
+		db_user,
+	} = configValidationResult.data;
 
 	return {
 		port,
-		jwtSecret: secret,
+		accessTokenSecret: access_token_secret,
+		refreshTokenSecret: refresh_token_secret,
 		database: {
 			host: db_host,
 			name: db_name,

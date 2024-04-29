@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const EnvironmentVariablesSchema = z.object({
 	port: z.coerce.number().safe().min(0).max(65535),
-	secret: z.string().min(1),
+	access_token_secret: z.string().min(1),
+	refresh_token_secret: z.string().min(1),
 	db_user: z.string().min(1),
 	db_pass: z.string().min(1),
 	db_name: z.string().min(1),
@@ -20,6 +21,7 @@ export interface DatabaseConfig {
 
 export interface AppConfig {
 	port: number;
-	jwtSecret: string;
+	accessTokenSecret: string;
+	refreshTokenSecret: string;
 	database: DatabaseConfig;
 }

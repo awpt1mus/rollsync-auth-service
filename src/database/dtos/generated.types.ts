@@ -6,6 +6,12 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface RefreshToken {
+	expiry: Timestamp;
+	id: Generated<string>;
+	value: string;
+}
+
 export interface User {
 	attempts: Generated<number | null>;
 	avatar_url: string | null;
@@ -22,5 +28,6 @@ export interface User {
 }
 
 export interface DB {
+	refresh_token: RefreshToken;
 	user: User;
 }
