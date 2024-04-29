@@ -1,14 +1,30 @@
-import { Body, Controller, HttpCode, Post, UseFilters } from "@nestjs/common";
+import {
+	Body,
+	Controller,
+	Get,
+	HttpCode,
+	Post,
+	UseFilters,
+	UseGuards,
+} from "@nestjs/common";
 import { ApiResponse, ApiTags } from "@nestjs/swagger";
+import { UserEntity } from "src/database/dtos/custom.types";
 import {
 	ApplicationErrorCodes,
 	ApplicationException,
 } from "src/root/dtos/application.exception";
 import { ApplicationErrorResponse } from "src/root/dtos/error.response.dto";
 import { GlobalExceptionFilter } from "src/root/global.exception.filter";
+import { RequestUser } from "./decorators/request.user.decorator";
 import { LoginDto } from "./dtos/login.dto";
 import { LoginSuccessDto } from "./dtos/login.success.dto";
 import { RegisterDto } from "./dtos/register.dto";
+import {
+	RefreshTokenRequestDto,
+	RefreshTokenRequestSuccessDto,
+} from "./dtos/token.dtos";
+import { UserInfoDto } from "./dtos/user.info.dto";
+import { AuthGuard } from "./guards/auth.guard";
 import { AuthService } from "./services/auth.service";
 @Controller("auth")
 @ApiTags("auth")
@@ -32,6 +48,11 @@ export class AuthController {
 		description: "login success",
 		type: LoginSuccessDto,
 	})
+	@ApiResponse({
+		status: 500,
+		description: "something went wrong on server",
+		type: ApplicationErrorResponse,
+	})
 	@HttpCode(200)
 	async handleTraditionalLogin(@Body() body: LoginDto) {
 		const result = await this.authService.verifyLogin(body);
@@ -53,6 +74,11 @@ export class AuthController {
 		description: "Conflict",
 		type: ApplicationErrorResponse,
 	})
+	@ApiResponse({
+		status: 500,
+		description: "something went wrong on server",
+		type: ApplicationErrorResponse,
+	})
 	async handleTraditionalSignUp(@Body() body: RegisterDto) {
 		const result = await this.authService.registerUser(body);
 
@@ -62,5 +88,63 @@ export class AuthController {
 				500,
 			);
 		}
+	}
+
+	@Get("/me")
+	@UseGuards(AuthGuard)
+	@ApiResponse({
+		status: 401,
+		description: "token expired or invalid",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 200,
+		description: "get user info",
+		type: UserInfoDto,
+	})
+	@ApiResponse({
+		status: 404,
+		description: "user not found / no longer exists",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 500,
+		description: "something went wrong on server",
+		type: ApplicationErrorResponse,
+	})
+	async getUserInfo(@RequestUser() user: UserEntity): Promise<UserInfoDto> {
+		return {
+			id: user.id,
+			avatar_url: user.avatar_url,
+			email: user.email,
+			firstname: user.firstname,
+			lastname: user.lastname,
+			username: user.username,
+		};
+	}
+
+	@Post("/refresh")
+	@ApiResponse({
+		status: 400,
+		description: "invalid request body provided",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 401,
+		description: "refresh token expired or invalid",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 200,
+		description: "successfully get new access token",
+		type: RefreshTokenRequestSuccessDto,
+	})
+	@ApiResponse({
+		status: 500,
+		description: "something went wrong on server",
+		type: ApplicationErrorResponse,
+	})
+	async getNewAccessToken(@Body() body: RefreshTokenRequestDto) {
+		return this.authService.getNewAccessToken(body.refresh_token);
 	}
 }
