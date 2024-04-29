@@ -1,10 +1,10 @@
-import {
-	ConflictException,
-	Injectable,
-	UnauthorizedException,
-} from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { plainToInstance } from "class-transformer";
 import { UserRepository } from "src/database/repositories/user.repository";
+import {
+	ApplicationErrorCodes,
+	ApplicationException,
+} from "src/root/dtos/application.exception";
 import { LoginDto } from "./dtos/login.dto";
 import { LoginSuccessDto } from "./dtos/login.success.dto";
 import { RegisterDto } from "./dtos/register.dto";
@@ -25,15 +25,41 @@ export class AuthService {
 		);
 
 		if (existingUser) {
-			throw new ConflictException(`user with ${dto.email} already exists`);
+			throw new ApplicationException(
+				ApplicationErrorCodes.AUTH_EMAIL_EXISTS,
+				409,
+			);
 		}
 
 		dto.password = await this.passwordService.hash(dto.password);
 		dto.email = dto.email.toLowerCase();
 
-		const result = await this.userRepository.insertUser(dto);
+		try {
+			const result = await this.userRepository.insertUser(dto);
+			return result.id;
+		} catch (error: unknown) {
+			const isObject = typeof error === "object";
 
-		return result.id;
+			if (isObject && "code" in error) {
+				switch (error.code) {
+					case "23505":
+						throw new ApplicationException(
+							ApplicationErrorCodes.AUTH_USERNAME_EXISTS,
+							HttpStatus.CONFLICT,
+						);
+					default:
+						throw new ApplicationException(
+							ApplicationErrorCodes.INTERNAL_SERVER_ERROR,
+							HttpStatus.INTERNAL_SERVER_ERROR,
+						);
+				}
+			}
+
+			throw new ApplicationException(
+				ApplicationErrorCodes.INTERNAL_SERVER_ERROR,
+				HttpStatus.INTERNAL_SERVER_ERROR,
+			);
+		}
 	}
 
 	async verifyLogin(dto: LoginDto): Promise<LoginSuccessDto> {
@@ -44,12 +70,16 @@ export class AuthService {
 		);
 
 		if (!existingUser) {
-			throw new UnauthorizedException();
+			throw new ApplicationException(
+				ApplicationErrorCodes.AUTH_INVALID_CREDENTIALS,
+				401,
+			);
 		}
 
 		if (existingUser.attempts === 3) {
-			throw new UnauthorizedException(
-				"account is locked due to reaching limits of unsuccessful attempts",
+			throw new ApplicationException(
+				ApplicationErrorCodes.AUTH_ACCOUNT_LOCKED,
+				401,
 			);
 		}
 
@@ -63,7 +93,10 @@ export class AuthService {
 
 			await this.userRepository.updateAttempts(existingUser.id, attempts);
 
-			throw new UnauthorizedException();
+			throw new ApplicationException(
+				ApplicationErrorCodes.AUTH_INVALID_CREDENTIALS,
+				401,
+			);
 		}
 
 		const { id, firstname, lastname, username, avatar_url } = existingUser;
