@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { DatabaseConnectionService } from "../services/connection.service";
 import {
 	InsertRefreshTokenEntity,
 	RefreshTokenEntity,
 } from "../dtos/custom.types";
+import { DatabaseConnectionService } from "../services/connection.service";
 
 export interface IRefreshTokenRepository {
 	findTokenByValue: (value: string) => Promise<RefreshTokenEntity | undefined>;
