@@ -15,3 +15,8 @@ export class RefreshTokenRequestDto {
 	@IsNotEmpty({ message: "refresh token is required" })
 	refresh_token: string;
 }
+
+export class RefreshTokenRequestSuccessDto {
+	@ApiProperty({ description: "access token" })
+	access_token: string;
+}
