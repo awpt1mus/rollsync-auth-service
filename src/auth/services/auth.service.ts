@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from "@nestjs/common";
-import { plainToInstance } from "class-transformer";
+import dayjs from "dayjs";
+import { RefreshTokenRepository } from "src/database/repositories/refresh.token.repository";
 import { UserRepository } from "src/database/repositories/user.repository";
 import {
 	ApplicationErrorCodes,
@@ -8,6 +9,10 @@ import {
 import { LoginDto } from "../dtos/login.dto";
 import { LoginSuccessDto } from "../dtos/login.success.dto";
 import { RegisterDto } from "../dtos/register.dto";
+import {
+	RefreshTokenRequestSuccessDto,
+	TokenPayload,
+} from "../dtos/token.dtos";
 import { TokenService } from "./jwt.service";
 import { PasswordService } from "./password.service";
 
@@ -17,6 +22,7 @@ export class AuthService {
 		private readonly userRepository: UserRepository,
 		private readonly passwordService: PasswordService,
 		private readonly tokenService: TokenService,
+		private readonly refreshTokenRepository: RefreshTokenRepository,
 	) {}
 
 	async registerUser(dto: RegisterDto) {
@@ -101,19 +107,65 @@ export class AuthService {
 
 		const { id, firstname, lastname, username, avatar_url } = existingUser;
 
-		const accessToken = await this.tokenService.newToken({
+		const tokenPayload: TokenPayload = {
 			id,
 			email: email.toLocaleLowerCase(),
-		});
+		};
 
-		return plainToInstance(LoginSuccessDto, {
-			access_token: accessToken,
-			id,
-			firstname,
-			lastname,
-			username,
-			avatar_url,
-			email: email.toLocaleLowerCase(),
-		});
+		const accessToken = await this.tokenService.newAccessToken(tokenPayload);
+		const refreshToken = await this.tokenService.newRefreshToken(tokenPayload);
+
+		try {
+			await this.refreshTokenRepository.insertToken({
+				value: refreshToken,
+				expiry: dayjs().add(30, "day").toDate(),
+			});
+
+			return {
+				access_token: accessToken,
+				refresh_token: refreshToken,
+				id,
+				firstname,
+				lastname,
+				username,
+				avatar_url,
+				email: email.toLocaleLowerCase(),
+			};
+		} catch (error) {
+			throw new ApplicationException(
+				ApplicationErrorCodes.INTERNAL_SERVER_ERROR,
+				500,
+			);
+		}
+	}
+
+	async getNewAccessToken(
+		refreshToken: string,
+	): Promise<RefreshTokenRequestSuccessDto> {
+		const exists =
+			await this.refreshTokenRepository.findTokenByValue(refreshToken);
+
+		if (!exists) {
+			throw new ApplicationException(
+				ApplicationErrorCodes.AUTH_REFRESH_TOKEN_REVOKED,
+				401,
+			);
+		}
+
+		const tokenValidation =
+			await this.tokenService.validateRefreshToken(refreshToken);
+
+		if (!tokenValidation.success) {
+			throw new ApplicationException(
+				ApplicationErrorCodes.AUTH_REFRESH_TOKEN_EXPIRED,
+				401,
+			);
+		}
+
+		const newAccessToken = await this.tokenService.newAccessToken(
+			tokenValidation.payload,
+		);
+
+		return { access_token: newAccessToken };
 	}
 }
