@@ -10,6 +10,8 @@ export default function loadConfig(): AppConfig {
 		db_name: process.env.DB_NAME,
 		db_port: process.env.DB_PORT,
 		db_host: process.env.DB_HOST,
+		google_android_client_id: process.env.GOOGLE_ANDROID_CLIENT_ID,
+		google_ios_client_id: process.env.GOOGLE_IOS_CLIENT_ID,
 	};
 
 	const configValidationResult = EnvironmentVariablesSchema.safeParse(config);
@@ -33,6 +35,8 @@ export default function loadConfig(): AppConfig {
 		db_pass,
 		db_port,
 		db_user,
+		google_android_client_id,
+		google_ios_client_id,
 	} = configValidationResult.data;
 
 	return {
@@ -45,6 +49,10 @@ export default function loadConfig(): AppConfig {
 			password: db_pass,
 			port: db_port,
 			user: db_user,
+		},
+		googleClientIdConfig: {
+			android: google_android_client_id,
+			ios: google_ios_client_id,
 		},
 	};
 }
