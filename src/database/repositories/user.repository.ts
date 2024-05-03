@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { UpdateResult } from "kysely";
 import { RegisterDto } from "src/auth/dtos/register.dto";
-import type { UserEntity } from "../dtos/custom.types";
+import type { GoogleUserPayload, UserEntity } from "../dtos/custom.types";
 import { DatabaseConnectionService } from "../services/connection.service";
 
 export interface IUserRepository {
@@ -9,6 +9,8 @@ export interface IUserRepository {
 	findById: (id: string) => Promise<UserEntity>;
 	insertUser: (dto: RegisterDto) => Promise<Pick<UserEntity, "id">>;
 	updateAttempts: (userId: string, attempts: number) => Promise<UpdateResult>;
+	insertGoogleUser: (dto: GoogleUserPayload) => Promise<UserEntity>;
+	findGoogleUser: (email: string, googleId: string) => Promise<UserEntity>;
 }
 
 @Injectable()
@@ -44,6 +46,30 @@ export class UserRepository implements IUserRepository {
 			.updateTable("user")
 			.set("attempts", attempts)
 			.where("id", "=", userId)
+			.executeTakeFirst();
+	}
+
+	async insertGoogleUser(dto: GoogleUserPayload) {
+		return this.databaseService.db
+			.insertInto("user")
+			.values({
+				firstname: dto.firstname,
+				lastname: dto.lastname,
+				avatar_url: dto.picture,
+				google_id: dto.googleId,
+				email: dto.email,
+				username: dto.username,
+			})
+			.returningAll()
+			.executeTakeFirst();
+	}
+
+	async findGoogleUser(email: string, googleId: string) {
+		return this.databaseService.db
+			.selectFrom("user")
+			.where("email", "=", email)
+			.where("google_id", "=", googleId)
+			.selectAll()
 			.executeTakeFirst();
 	}
 }
