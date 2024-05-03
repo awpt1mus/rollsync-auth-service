@@ -10,6 +10,7 @@ export interface IUserRepository {
 	insertUser: (dto: RegisterDto) => Promise<Pick<UserEntity, "id">>;
 	updateAttempts: (userId: string, attempts: number) => Promise<UpdateResult>;
 	insertGoogleUser: (dto: GoogleUserPayload) => Promise<UserEntity>;
+	findGoogleUser: (email: string, googleId: string) => Promise<UserEntity>;
 }
 
 @Injectable()
@@ -60,6 +61,15 @@ export class UserRepository implements IUserRepository {
 				username: dto.username,
 			})
 			.returningAll()
+			.executeTakeFirst();
+	}
+
+	async findGoogleUser(email: string, googleId: string) {
+		return this.databaseService.db
+			.selectFrom("user")
+			.where("email", "=", email)
+			.where("google_id", "=", googleId)
+			.selectAll()
 			.executeTakeFirst();
 	}
 }
