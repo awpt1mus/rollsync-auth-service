@@ -3,11 +3,13 @@ import {
 	Controller,
 	Get,
 	HttpCode,
+	Logger,
 	Post,
+	Query,
 	UseFilters,
 	UseGuards,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UserEntity } from "src/database/dtos/custom.types";
 import {
 	ApplicationErrorCodes,
@@ -16,6 +18,8 @@ import {
 import { ApplicationErrorResponse } from "src/root/dtos/error.response.dto";
 import { GlobalExceptionFilter } from "src/root/global.exception.filter";
 import { RequestUser } from "./decorators/request.user.decorator";
+import { GoogleSignInDto } from "./dtos/google.sign.in.dto";
+import { GoogleSignUpDto } from "./dtos/google.sign.up.dto";
 import { LoginDto } from "./dtos/login.dto";
 import { LoginSuccessDto } from "./dtos/login.success.dto";
 import { RegisterDto } from "./dtos/register.dto";
@@ -30,6 +34,7 @@ import { AuthService } from "./services/auth.service";
 @ApiTags("auth")
 @UseFilters(GlobalExceptionFilter)
 export class AuthController {
+	private readonly logger = new Logger(AuthController.name);
 	constructor(private readonly authService: AuthService) {}
 
 	@Post("/login")
@@ -148,5 +153,84 @@ export class AuthController {
 	@HttpCode(200)
 	async getNewAccessToken(@Body() body: RefreshTokenRequestDto) {
 		return this.authService.getNewAccessToken(body.refresh_token);
+	}
+
+	@Post("/google/signup")
+	@ApiQuery({
+		name: "device",
+		required: true,
+		enum: ["android", "ios"],
+	})
+	@ApiResponse({
+		status: 400,
+		description: "invalid request body provided",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 401,
+		description: "invalid id token",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 201,
+		description: "google sign up success",
+		type: LoginSuccessDto,
+	})
+	@ApiResponse({
+		status: 409,
+		description: "google id/email already exists",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 500,
+		description: "something went wrong on server",
+		type: ApplicationErrorResponse,
+	})
+	async handleGoogleSignUp(
+		@Query("device") device: "android" | "ios",
+		@Body() payload: GoogleSignUpDto,
+	) {
+		this.logger.debug(`sign up request from device ${device}`);
+		return this.authService.validateGoogleSignUp(payload, device);
+	}
+
+	@Post("/google/signin")
+	@ApiQuery({
+		name: "device",
+		required: true,
+		enum: ["android", "ios"],
+	})
+	@HttpCode(200)
+	@ApiResponse({
+		status: 400,
+		description: "invalid request body provided",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 404,
+		description: "user doesn't exist with google id/email",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 401,
+		description: "invalid id token",
+		type: ApplicationErrorResponse,
+	})
+	@ApiResponse({
+		status: 200,
+		description: "google sign in success",
+		type: LoginSuccessDto,
+	})
+	@ApiResponse({
+		status: 500,
+		description: "something went wrong on server",
+		type: ApplicationErrorResponse,
+	})
+	async handleGoogleSignIn(
+		@Query("device") device: "android" | "ios",
+		@Body() payload: GoogleSignInDto,
+	) {
+		this.logger.debug(`sign in request from device ${device}`);
+		return this.authService.validateGoogleSignIn(payload.id_token, device);
 	}
 }
