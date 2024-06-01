@@ -34,6 +34,9 @@ async function main() {
 	//delete all users.
 	await db.deleteFrom("user").execute();
 
+	//delete refresh tokens
+	await db.deleteFrom("refresh_token").execute();
+
 	const users: InsertUserEntity = [
 		{
 			email: "john@gmail.com",
